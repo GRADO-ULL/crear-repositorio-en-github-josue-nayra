@@ -67,6 +67,18 @@ var crear_gitbook = (() => {
                       }
                   });
                    
+                  //-----------------------------------
+                  fs.mkdirp(path.join(basePath, directorio , '.gitbook-start'), function (err) {
+                      if (err) {
+                        console.error(err);
+                      }
+                  });
+
+                  fs.copy(path.join(__dirname, '../template', '.gitbook-start') , path.join(basePath, directorio ,'.gitbook-start'), function(err){
+                      if(err) return console.error(err)
+                  });
+                  //----------------------------
+                  
                     fs.copy(path.join(__dirname, '../template', 'scripts') , path.join(basePath, directorio ,'scripts'), function(err){
                         if(err) return console.error(err)
                     });  
