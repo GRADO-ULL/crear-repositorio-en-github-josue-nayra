@@ -3,7 +3,11 @@ const ejs = require('ejs');
 const path = require('path');
 const basePath = process.cwd();
 const myArgs = require('minimist')(process.argv.slice(2));
+
 const gitconfig = require('git-config');
+const github = require('octonode');
+const pkj = require(path.join(basePath,'package.json'));
+const git = require('simple-git');
 
 var directorio;
 var autor;
@@ -131,4 +135,27 @@ var crear_gitbook = (() => {
     
 });
 
+var crear_repo =(() =>
+{
+    const config = require(path.join(basePath,'.gitbook-start','config.json'));
+    const client = github.client(config.token); //Obtengo el token
+    const ghme = client.me();
+
+    //Creando repositorio
+    ghme.repo({
+       "name": pkj.name,
+       "description": pkj.description
+    },(error, stdout, stderr) => {
+        if(error) throw error;
+        console.log("Creando repositorio con el nombre:"+pkj.name);
+        console.log("Url repo:"+stdout.clone_url);
+        git(path.join(basePath, myArgs.d))
+          .init()
+           .add('./*')
+           .commit("first commit!")
+           .addRemote('origin', stdout.clone_url)
+    });
+});
+
+exports.crear_repo = crear_repo;
 exports.crear_gitbook = crear_gitbook;

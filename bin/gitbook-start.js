@@ -50,6 +50,7 @@ else
         }
         else
         {
+            creacion.crear_repo();
             creacion.crear_gitbook();   
         }
     }
