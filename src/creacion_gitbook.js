@@ -161,7 +161,7 @@ var crear_repo =(() =>
         if(error) throw error;
         console.log("Creando repositorio con el nombre:"+pkj.name);
         console.log("Url repo:"+stdout.clone_url);
-        git(path.join(basePath, myArgs.d))
+        git()
           .init()
            .add('./*')
            .commit("first commit!")
