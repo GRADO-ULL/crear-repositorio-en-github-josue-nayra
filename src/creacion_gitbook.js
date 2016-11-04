@@ -72,10 +72,16 @@ var crear_gitbook = (() => {
                         console.error(err);
                       }
                   });
-
-                  fs.copy(path.join(__dirname, '../template', '.gitbook-start') , path.join(basePath, directorio ,'.gitbook-start'), function(err){
-                      if(err) return console.error(err)
-                  });
+                  
+                  const cadena = `{\n
+                                    "token": " "
+                                  }`;
+                                  
+                  fs.writeFile(path.join(basePath, directorio , '.gitbook-start','config.json'), cadena, function(err) {
+                        if(err) {
+                            return console.log(err);
+                        }
+                  }); 
                   //----------------------------
                   
                     fs.copy(path.join(__dirname, '../template', 'scripts') , path.join(basePath, directorio ,'scripts'), function(err){
