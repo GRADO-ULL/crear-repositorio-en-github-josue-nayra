@@ -46,17 +46,32 @@ gulp.task('instalar_plugins', function()
 });
 
 //------------------------------------------------------------------------------------
+//Building and deploying Gitbook to gh-pages
+//Build-gitbook
+gulp.task('build', function()
+{
+    return gulp.src(path.join(__dirname,'scripts'))
+       .pipe(shell(['./scripts/losh generate-gitbook']))
+});
+
+//Build-wiki
+gulp.task('build_wiki', function()
+{
+    return gulp.src(path.join(__dirname,'scripts'))
+            .pipe(shell(['./scripts/losh generate-wiki']))
+});
+
+// Build- All
+gulp.task('build_all', ['build', 'build_wiki']);
 
 // Generate-Gitbook
 
 gulp.task('deploy', function(){
     return gulp.src(path.join(__dirname,'scripts'))
-       .pipe(shell(['./scripts/losh generate-gitbook']))
-       .pipe(shell(['./scripts/losh generate-wiki']))
        .pipe(shell(['./scripts/losh deploy-gitbook']))
        .pipe(shell(['./scripts/losh deploy-wiki']));
 });
 
 //------------------------------------------------------------------------------------
-
-gulp.task('default', ['deploy']);
+//Default
+gulp.task('default', ['build']);
