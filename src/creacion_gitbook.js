@@ -6,7 +6,6 @@ const myArgs = require('minimist')(process.argv.slice(2));
 
 const gitconfig = require('git-config');
 const github = require('octonode');
-const pkj = require(path.join(basePath,'package.json'));
 const git = require('simple-git');
 
 var directorio;
@@ -152,6 +151,7 @@ var crear_repo =(() =>
     const config = require(path.join(basePath,'.gitbook-start','config.json'));
     const client = github.client(config.token); //Obtengo el token
     const ghme = client.me();
+    const pkj = require(path.join(basePath,'package.json'));
 
     //Creando repositorio
     ghme.repo({
