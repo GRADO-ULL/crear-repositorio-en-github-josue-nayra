@@ -78,7 +78,7 @@ $ npm install --save gitbook-start-heroku-josue-nayra
 
 ```json
 {
-    token: "<token generado>"
+    "token": "<token generado>"
 }
 ```
 
