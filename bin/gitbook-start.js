@@ -30,7 +30,7 @@ else
     {
         if(myArgs.deploy)
         {
-            creacion.crear_repo();
+            // creacion.crear_repo();
 
             const packagejson = require(path.join(basePath, 'package.json'));
             console.log("Desplegando en... "+myArgs.deploy);
