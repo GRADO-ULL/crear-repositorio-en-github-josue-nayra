@@ -9,13 +9,6 @@ const github = require('octonode');
 const git = require('simple-git');
 const prompt = require('prompt');
 
-var directorio;
-var autor;
-var url_repo;
-var nombre_gitbook;
-var url_wiki;
-var url_bugs;
-
 // console.log("File src/creacion_gitbook.js");
 
 
@@ -299,13 +292,6 @@ var crear_repo =(() =>
                 if(error) throw error;
                 console.log("Creando repositorio con el nombre:"+myArgs.d);
                 console.log("Url repo:"+stdout.clone_url);
-                
-                //Añadimos remoto correspondiente
-                git(path.join(basePath,myArgs.d))
-                  .init()
-                  .add('./*')
-                  .commit("first commit!")
-                  .addRemote('origin', stdout.clone_url)
                   
                 result(stdout.clone_url);  
             });  
