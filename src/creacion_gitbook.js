@@ -20,6 +20,7 @@ var url_bugs;
 
 
 //----------------------------------------------------------------------------------------------------
+// Función para la creación de un libro.
 
 var crear_gitbook = (() => {
     gitconfig(function(err,config){
@@ -131,7 +132,7 @@ var crear_gitbook = (() => {
 });
 
 //----------------------------------------------------------------------------------------------------
-// Función crear_token
+// Función para la creación de un token.
 
 var schema = {
     properties: {
@@ -169,7 +170,7 @@ var crear_token = (() =>
 });
 
 //----------------------------------------------------------------------------------------------------
-// Función login
+// Función para el login
 
 var login = (() =>
 {
@@ -222,30 +223,40 @@ var login = (() =>
 });
 
 //----------------------------------------------------------------------------------------------------
+// Función para la creación del repositorio
 
 var crear_repo =(() =>
 {
-    const config = require(path.join(basePath,'.gitbook-start','config.json'));
-    const client = github.client(config.token); //Obtengo el token
-    const ghme = client.me();
-    const pkj = require(path.join(basePath,'package.json'));
-
-    //Creando repositorio
-    ghme.repo({
-       "name": pkj.name,
-       "description": pkj.description
-    },(error, stdout, stderr) => {
-        if(error) throw error;
-        console.log("Creando repositorio con el nombre:"+pkj.name);
-        console.log("Url repo:"+stdout.clone_url);
-        git()
-          .init()
-           .add('./*')
-           .commit("first commit!")
-           .addRemote('origin', stdout.clone_url)
+    return new Promise((result, reject) =>
+    {
+        login().then((resolve, reject) => 
+        {
+            // console.log("Resolve login:"+resolve);
+            const client = github.client(resolve); //Obtengo el token
+            const ghme = client.me();
+            // const pkj = require(path.join(basePath,'package.json'));
+        
+            //Creando repositorio
+            ghme.repo({
+               "name": myArgs.d,
+               "description": "Gitbook"
+            },(error, stdout, stderr) => {
+                if(error) throw error;
+                console.log("Creando repositorio con el nombre:"+myArgs.d);
+                console.log("Url repo:"+stdout.clone_url);
+                
+                //Añadimos remoto correspondiente
+                git(path.join(basePath,myArgs.d))
+                  .init()
+                  .add('./*')
+                  .commit("first commit!")
+                  .addRemote('origin', stdout.clone_url)
+                  
+                result(stdout.clone_url);  
+            });  
+        });
     });
 });
-
 
 //----------------------------------------------------------------------------------------------------
 
