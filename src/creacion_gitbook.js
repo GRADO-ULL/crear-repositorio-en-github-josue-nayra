@@ -7,6 +7,7 @@ const myArgs = require('minimist')(process.argv.slice(2));
 const gitconfig = require('git-config');
 const github = require('octonode');
 const git = require('simple-git');
+const prompt = require('prompt');
 
 var directorio;
 var autor;
@@ -16,6 +17,9 @@ var url_wiki;
 var url_bugs;
 
 // console.log("File src/creacion_gitbook.js");
+
+
+//----------------------------------------------------------------------------------------------------
 
 var crear_gitbook = (() => {
         gitconfig(function(err,config){
@@ -152,6 +156,46 @@ var crear_gitbook = (() => {
     
 });
 
+//----------------------------------------------------------------------------------------------------
+// Función crear_token
+
+var schema = {
+    properties: {
+        name: {
+            required: true
+        },
+        password: {
+            hidden: true
+        }
+    }
+};
+
+var crear_token = (() =>
+{
+    return new Promise((resolve,reject) =>
+    {
+        prompt.start();
+        
+        prompt.get(schema, (err, result) =>
+        {
+           if(err) throw err;
+           
+          github.auth.config({ username: result.name, password: result.password }).login({
+              scopes: ['user', 'repo'],
+              note: 'Token para Gitbook'
+            }, (err, id, token) => {
+              if (err) return reject(err)
+            //   console.log(err)
+            //   console.log(id)
+            //   console.log(token) // Ahora si tenemos el token de github!!
+              resolve(token);
+            })        
+        });
+    });
+});
+
+//----------------------------------------------------------------------------------------------------
+
 var crear_repo =(() =>
 {
     const config = require(path.join(basePath,'.gitbook-start','config.json'));
@@ -174,6 +218,9 @@ var crear_repo =(() =>
            .addRemote('origin', stdout.clone_url)
     });
 });
+
+
+//----------------------------------------------------------------------------------------------------
 
 exports.crear_repo = crear_repo;
 exports.crear_gitbook = crear_gitbook;
