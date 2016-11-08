@@ -169,6 +169,59 @@ var crear_token = (() =>
 });
 
 //----------------------------------------------------------------------------------------------------
+// Función login
+
+var login = (() =>
+{
+   return new Promise((result,reject) =>
+   {
+        if(fs.existsSync(path.join(process.env.HOME,'.gitbook-start','config.json')))
+        {
+            fs.readFile(path.join(process.env.HOME,'.gitbook-start','config.json'), (err, data) =>
+            {
+                if(err)
+                {
+                    throw err;
+                }
+                else
+                {
+                    if(JSON.parse(data).token)
+                    {
+                        console.log("Autenticación ya realizada previamente.");
+                        var datos = JSON.parse(data);
+                        // console.log("Token si existe config.json:"+datos.token);
+                        result(datos.token);   
+                    }
+                }
+            });
+        }
+        else
+        {
+            console.log("Autenticación:");
+            crear_token().then((resolve,reject) =>
+            {
+                // console.log("TOKEEEEENNNN:"+resolve);
+                if(!fs.existsSync(path.join(process.env.HOME,'.gitbook-start')))
+                {
+                    fs.mkdirp(path.join(process.env.HOME,'.gitbook-start'),(err) =>
+                    {
+                        if(err) throw err;
+                    });
+                }
+                
+                var config = `{ "token": "${resolve}" }`;
+                
+                fs.writeFile(path.join(process.env.HOME,'.gitbook-start','config.json'), config, (err) =>
+                {
+                  if(err) throw err;
+                  result(resolve);
+                });
+            });
+        }
+   });
+});
+
+//----------------------------------------------------------------------------------------------------
 
 var crear_repo =(() =>
 {
