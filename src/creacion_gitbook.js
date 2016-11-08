@@ -20,73 +20,96 @@ var url_bugs;
 
 
 //----------------------------------------------------------------------------------------------------
-// Función para la creación de un libro.
+// Función para la asignación de variables
 
-var crear_gitbook = (() => {
-    gitconfig(function(err,config){
-        if(err) console.error(err);
-    
-        autor = myArgs.autor || config.user.name || "Usuario"; 
-        directorio = myArgs.d || myArgs.dir || myArgs.name || 'Milibro';
-        nombre_gitbook = myArgs.name || myArgs.d || myArgs.autor || "Milibro";
-        directorio = directorio.toLowerCase();
-        nombre_gitbook = nombre_gitbook.toLowerCase();
+var asignacion_variables = (() =>
+{
+    return new Promise((result, reject) =>
+    {
+        gitconfig(function(err,config){
+            if(err) console.error(err);
             
-        if(myArgs.url)
-        {
-            url_repo = myArgs.url;
-            url_wiki = myArgs.url.split(".git")[0].concat('.wiki.git');
-            url_bugs = myArgs.url.split(".git")[0].concat('/issues');
-        }
-        else
-        {
-            //Aqui podriamos crear un repo a través de la api de github
-            url_repo = " ";
-            url_wiki = " ";
-            url_bugs = " ";
-        }
+            var directorio;
+            var autor;
+            var url_repo;
+            var nombre_gitbook;
+            var url_wiki;
+            var url_bugs;
             
-        fs.mkdirp(path.join(basePath, directorio), function(err){
-            if(err){
-                console.error(err);
+            autor = myArgs.autor || config.user.name || "Usuario"; 
+            directorio = myArgs.d || myArgs.dir || myArgs.name || 'Milibro';
+            nombre_gitbook = myArgs.name || myArgs.d || myArgs.autor || "Milibro";
+            directorio = directorio.toLowerCase();
+            nombre_gitbook = nombre_gitbook.toLowerCase();
+            
+            if(myArgs.url)
+            {
+                url_repo = myArgs.url;
+                url_wiki = myArgs.url.split(".git")[0].concat('.wiki.git');
+                url_bugs = myArgs.url.split(".git")[0].concat('/issues');
+                result({ autor: autor, directorio: directorio, nombre_gitbook: nombre_gitbook, url_repo: url_repo, url_wiki: url_wiki, url_bugs: url_bugs});
             }
             else
             {
-                fs.copy(path.join(__dirname,'../template','.npmignore'), path.join(basePath, directorio , '.gitignore'), function(err){
+                //Aqui podriamos crear un repo a través de la api de github
+                crear_repo().then((resolve,reject) =>
+                {
+                    url_repo = resolve;
+                    url_wiki = resolve.split(".git")[0].concat('.wiki.git');
+                    url_bugs = resolve.split(".git")[0].concat('/issues');
+                    result({ autor: autor, directorio: directorio, nombre_gitbook: nombre_gitbook, url_repo: url_repo, url_wiki: url_wiki, url_bugs: url_bugs});
+                });
+            }
+        });
+    });
+});
+
+//----------------------------------------------------------------------------------------------------
+
+var crear_estructura = ((datos) =>
+{
+    return new Promise((result,reject) => 
+    {
+        fs.mkdirp(path.join(basePath, datos.directorio), function(err){
+            if(err){
+                console.error(err);
+            }
+            else{
+                fs.copy(path.join(__dirname,'../template','.npmignore'), path.join(basePath, datos.directorio , '.gitignore'), function(err){
                     if(err) console.log("Error creando .gitignore:"+err);
                 });
-            
-                fs.copy(path.join(__dirname,'../template','app.js'), path.join(basePath, directorio , 'app.js'));
-
-                fs.copy(path.join(__dirname,'../template','gulpfile.js'), path.join(basePath, directorio , 'gulpfile.js'));
-            
-                fs.copy(path.join(__dirname,'../template','README.md'), path.join(basePath, directorio , 'README.md'));   
-            
-                fs.copy(path.join(__dirname, '../template', 'VERSION'), path.join(basePath, directorio , 'VERSION'));   
-                   
-                fs.mkdirp(path.join(basePath, directorio , 'scripts'), function (err) {
+                
+                fs.copy(path.join(__dirname,'../template','app.js'), path.join(basePath, datos.directorio , 'app.js'));
+    
+                fs.copy(path.join(__dirname,'../template','gulpfile.js'), path.join(basePath, datos.directorio , 'gulpfile.js'));
+                
+                fs.copy(path.join(__dirname,'../template','README.md'), path.join(basePath, datos.directorio , 'README.md'));   
+                
+                fs.copy(path.join(__dirname, '../template', 'VERSION'), path.join(basePath, datos.directorio , 'VERSION'));   
+                       
+                fs.mkdirp(path.join(basePath, datos.directorio , 'scripts'), function (err) {
                     if (err) {
                         console.error(err);
                     }
                 });
-                   
-                  
-                fs.copy(path.join(__dirname, '../template', 'scripts') , path.join(basePath, directorio ,'scripts'), function(err){
+                      
+                fs.copy(path.join(__dirname, '../template', 'scripts') , path.join(basePath, datos.directorio ,'scripts'), function(err){
                     if(err) return console.error(err)
                 });  
-                   
-                fs.mkdirp(path.join(basePath, directorio , '/txt'), function (err) {
+                       
+                fs.mkdirp(path.join(basePath, datos.directorio , '/txt'), function (err) {
                     if (err) {
                         console.error(err);
                     }
                     else {
-                        fs.copy(path.join(__dirname, '../template', 'txt' , 'SUMMARY.md'), path.join(basePath, directorio , 'txt', 'SUMMARY.md'));
-            
-                        fs.copy(path.join(__dirname,'../template', 'txt', 'section1'), path.join(basePath, directorio , 'txt', 'section1'), function(err){
+                
+                        fs.copy(path.join(__dirname, '../template', 'txt' , 'SUMMARY.md'), path.join(basePath, datos.directorio , 'txt', 'SUMMARY.md'));
+                
+                        fs.copy(path.join(__dirname,'../template', 'txt', 'section1'), path.join(basePath, datos.directorio , 'txt', 'section1'), function(err){
                             if(err) return console.error(err)
                         });   
-                        
-                        ejs.renderFile(path.join(__dirname, '../template', 'txt', 'README.ejs'), { name_gitbook: nombre_gitbook}, function(err,str) {
+                            
+                        ejs.renderFile(path.join(__dirname, '../template', 'txt', 'README.ejs'), { name_gitbook: datos.nombre_gitbook}, function(err,str) {
                             if(err) {
                                 console.error(err);
                                 throw err;
@@ -94,41 +117,73 @@ var crear_gitbook = (() => {
                             else {
                                 if(str) {
                                     //Creamos y escribimos en el fichero README.md
-                                    fs.writeFile(path.join(basePath, directorio ,'txt', 'README.md'), str);
+                                    fs.writeFile(path.join(basePath, datos.directorio ,'txt', 'README.md'), str);
                                 }
                             }
                         });
-            
+                
                     }
                 });
             }
         });
-            
-        // Construyendo "package.json"
-        ejs.renderFile(path.join(__dirname, '../template', 'package.ejs'), { autor: autor , name_gitbook: nombre_gitbook, url: url_repo, url_bugs: url_bugs, url_wiki: url_wiki}, function(err,str){
-            if(err) {
-                console.error("ERROR:"+err);
-            }
-            if(str) {
-                
-                fs.writeFile(path.join(basePath, directorio , 'package.json'), str);
-            }
-            
-        });
         
-        // Construyendo "book.json"
-            
-        ejs.renderFile(path.join(__dirname, '../template', 'book.ejs'), { name_gitbook: nombre_gitbook}, function(err,str){
+        // Construyendo "package.json"
+        ejs.renderFile(path.join(__dirname, '../template', 'package.ejs'), { autor: datos.autor , name_gitbook: datos.nombre_gitbook, url: datos.url_repo, url_bugs: datos.url_bugs, url_wiki: datos.url_wiki}, function(err,str){
             if(err) {
                 console.error("ERROR:"+err);
             }
             if(str) {
-                fs.writeFile(path.join(basePath, directorio , 'book.json'), str);
+                fs.writeFile(path.join(basePath, datos.directorio , 'package.json'), str);
             }
         });
+                
+        // Construyendo "book.json"
+        ejs.renderFile(path.join(__dirname, '../template', 'book.ejs'), { name_gitbook: datos.nombre_gitbook}, function(err,str){
+            if(err) {
+                console.error("ERROR:"+err);
+            }
+            if(str) {
+                fs.writeFile(path.join(basePath, datos.directorio , 'book.json'), str);
+            }
+        });    
+        result(datos);
     });
-    console.log("Gitbook built!");
+});
+
+//----------------------------------------------------------------------------------------------------
+// Asignación del repositorio remoto en el directorio del libro. 
+
+var asignar_remoto = ((datos) =>
+{
+    console.log("Datos1:"+JSON.stringify(datos));
     
+    return new Promise((resolve,reject) =>
+    {
+       //Añadimos remoto correspondiente
+        git(path.join(basePath,myArgs.d))
+          .init()
+          .add('./*')
+          .commit("first commit!")
+          .addRemote('origin', datos.url_repo) 
+    });
+});
+
+//----------------------------------------------------------------------------------------------------
+// Función para la creación de un libro
+
+var crear_gitbook = (() => {
+    asignacion_variables().then((resolve,reject) =>
+    {
+    //   console.log("Variables:"+JSON.stringify(resolve)); 
+       var  datos = resolve;
+       crear_estructura(datos).then((resolve,reject) =>
+       {
+           asignar_remoto(datos).then(() =>
+           {
+             console.log("Gitbook built!");  
+           });
+       });
+    });
 });
 
 //----------------------------------------------------------------------------------------------------
