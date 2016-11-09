@@ -7,6 +7,7 @@ const myArgs = require('minimist')(process.argv.slice(2));
 const github = require('octonode');
 const git = require('simple-git');
 const prompt = require('prompt');
+const sync_git = require(path.join(__dirname, 'login.js'));
 
 // console.log("File src/creacion_gitbook.js");
 
@@ -160,38 +161,44 @@ var crear_estructura = ((datos) =>
                 
                     }
                 });
-            }
-        });
-        
-        // Construyendo "package.json"
-        ejs.renderFile(path.join(__dirname, '../template', 'package.ejs'), { autor: datos.autor , name_gitbook: datos.nombre_gitbook, url: datos.url_repo, url_bugs: datos.url_bugs, url_wiki: datos.url_wiki}, function(err,str){
-            if(err) {
-                console.error("ERROR:"+err);
-            }
-            if(str) {
-                fs.writeFile(path.join(basePath, datos.directorio , 'package.json'), str);
-            }
-        });
+                }
+                });
                 
-        // Construyendo "book.json"
-        ejs.renderFile(path.join(__dirname, '../template', 'book.ejs'), { name_gitbook: datos.nombre_gitbook}, function(err,str){
-            if(err) {
-                console.error("ERROR:"+err);
-            }
-            if(str) {
-                fs.writeFile(path.join(basePath, datos.directorio , 'book.json'), str);
-            }
-        });    
-        result(datos);
+                // Construyendo "package.json"
+                
+                ejs.renderFile(path.join(__dirname, '../template', 'package.ejs'), { autor: datos.autor , name_gitbook: datos.nombre_gitbook, url: datos.url_repo, url_bugs: datos.url_bugs, url_wiki: datos.url_wiki}, function(err,str){
+                    if(err) {
+                        console.error("ERROR:"+err);
+                    }
+                    if(str) {
+                        
+                        fs.writeFile(path.join(basePath, datos.directorio , 'package.json'), str);
+                    }
+                    
+                });
+                
+                // Construyendo "book.json"
+                
+                ejs.renderFile(path.join(__dirname, '../template', 'book.ejs'), { name_gitbook: datos.nombre_gitbook}, function(err,str){
+                    if(err) {
+                        console.error("ERROR:"+err);
+                    }
+                    if(str) {
+                
+                        fs.writeFile(path.join(basePath, datos.directorio , 'book.json'), str);
+                
+                    }
+                    
+                });    
+                result(datos);
     });
 });
 
 //----------------------------------------------------------------------------------------------------
-// Asignación del repositorio remoto en el directorio del libro. 
 
 var asignar_remoto = ((datos) =>
 {
-    console.log("Datos1:"+JSON.stringify(datos));
+    // console.log("Datos1:"+JSON.stringify(datos));
     
     return new Promise((resolve,reject) =>
     {
@@ -208,7 +215,7 @@ var asignar_remoto = ((datos) =>
 // Función para la creación de un libro
 
 var crear_gitbook = (() => {
-    login().then((resolve,reject) =>
+    sync_git.login().then((resolve,reject) =>
     {
         client = github.client(resolve); //Configuro cliente Git
 
@@ -229,96 +236,6 @@ var crear_gitbook = (() => {
     });
 });
 
-//----------------------------------------------------------------------------------------------------
-// Función para la creación de un token.
-
-var schema = {
-    properties: {
-        name: {
-            required: true
-        },
-        password: {
-            hidden: true
-        }
-    }
-};
-
-var crear_token = (() =>
-{
-    return new Promise((resolve,reject) =>
-    {
-        prompt.start();
-        
-        prompt.get(schema, (err, result) =>
-        {
-           if(err) throw err;
-           
-          github.auth.config({ username: result.name, password: result.password }).login({
-              scopes: ['user', 'repo'],
-              note: 'Token para Gitbook'
-            }, (err, id, token) => {
-              if (err) throw err;
-            //   console.log(err)
-            //   console.log(id)
-            //   console.log(token) // Ahora si tenemos el token de github!!
-              resolve(token);
-            })        
-        });
-    });
-});
-
-//----------------------------------------------------------------------------------------------------
-// Función para el login
-
-var login = (() =>
-{
-   return new Promise((result,reject) =>
-   {
-        if(fs.existsSync(path.join(process.env.HOME,'.gitbook-start','config.json')))
-        {
-            fs.readFile(path.join(process.env.HOME,'.gitbook-start','config.json'), (err, data) =>
-            {
-                if(err)
-                {
-                    throw err;
-                }
-                else
-                {
-                    if(JSON.parse(data).token)
-                    {
-                        console.log("Autenticación ya realizada previamente.");
-                        var datos = JSON.parse(data);
-                        // console.log("Token si existe config.json:"+datos.token);
-                        result(datos.token);   
-                    }
-                }
-            });
-        }
-        else
-        {
-            console.log("Autenticación:");
-            crear_token().then((resolve,reject) =>
-            {
-                // console.log("TOKEEEEENNNN:"+resolve);
-                if(!fs.existsSync(path.join(process.env.HOME,'.gitbook-start')))
-                {
-                    fs.mkdirp(path.join(process.env.HOME,'.gitbook-start'),(err) =>
-                    {
-                        if(err) throw err;
-                    });
-                }
-                
-                var config = `{ "token": "${resolve}" }`;
-                
-                fs.writeFile(path.join(process.env.HOME,'.gitbook-start','config.json'), config, (err) =>
-                {
-                  if(err) throw err;
-                  result(resolve);
-                });
-            });
-        }
-   });
-});
 
 //----------------------------------------------------------------------------------------------------
 // Función para la creación del repositorio

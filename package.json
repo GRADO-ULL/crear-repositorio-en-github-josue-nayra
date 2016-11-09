@@ -1,6 +1,6 @@
 {
   "name": "gitbook-start-josue-nayra",
-  "version": "1.7.9",
+  "version": "1.8.1",
   "description": "A package for building an initial gitbook structure",
   "main": "gitbook-start.js",
   "bin": {
@@ -56,6 +56,7 @@
     "gulp-shell": "^0.5.2",
     "minimist": "^1.2.0",
     "octonode": "^0.7.6",
+    "prompt": "^1.0.0",
     "simple-git": "^1.54.0",
     "ssh-exec": "^2.0.0"
   }
