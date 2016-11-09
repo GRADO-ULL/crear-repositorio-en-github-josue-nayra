@@ -20,6 +20,9 @@ var schema = {
         },
         password: {
             hidden: true
+        },
+        descripcion: {
+            required: true
         }
     }
 };
@@ -32,11 +35,11 @@ var crear_token = (() =>
         
         prompt.get(schema, (err, result) =>
         {
-           if(err) throw err;
+            if(err) throw err;
            
-          github.auth.config({ username: result.name, password: result.password }).login({
+            github.auth.config({ username: result.name, password: result.password }).login({
               scopes: ['user', 'repo'],
-              note: 'Token para Gitbook'
+              note: result.descripcion
             }, (err, id, token) => {
               if (err) throw err;
             //   console.log(err)

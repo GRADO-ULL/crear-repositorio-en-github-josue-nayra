@@ -12,7 +12,16 @@ En esta práctica sólo se pide desarrollar el plugin para iaas.ull.es
 [Plugin: gitbook-start-heroku-josue-nayra](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-heroku-josue-nayra)
 
 
-### Pasos a seguir para la utilización del plugin
+### Aspectos a tener en cuenta:
+
+El paquete principal **gitbook-start-josue-nayra** ha sido modificado para prácticas posteriores por lo se ha sobreescrito y puede tener comportamientos diferentes.
+
+Al ejecutar el comando **gitbook-start -d <directorio> ...** sin introducir la opción de **-u <url>** se mostrará el prompt y pedirá las credenciales del usuario para la creación de un nuevo repositorio.
+
+
+
+
+### Pasos a seguir para la utilización de los plugins
 
 1- Descargar el paquete inicial: **gitbook-start**
     
