@@ -2,34 +2,46 @@
 
 ## Nueva funcionalidad para el paquete NPM: plugins (IAAS, API de Heroku y API de Github)
 
-El objetivo de esta práctica es extender el package NodeJS desarrollado en la [pŕactica 4](https://github.com/ULL-ESIT-SYTW-1617/nueva-funcionalidad-para-el-paquete-npm-plugins-josue-nayra.git), publicado en npm con una nueva funcionalidad que permita que los usuarios con conocimientos de NodeJS puedan extender la conducta del ejecutable para que este realice el despliegue en plataformas distintas de las ya consideradas.
+El objetivo de esta práctica es extender el package NodeJS desarrollado en la [pŕactica 4](https://github.com/ULL-ESIT-SYTW-1617/nueva-funcionalidad-para-el-paquete-npm-plugins-josue-nayra.git), publicado en [npm](https://www.npmjs.com/package/gitbook-start-josue-nayra) con una nueva funcionalidad que permita que los usuarios con conocimientos de NodeJS puedan extender la conducta del ejecutable para que este realice el despliegue en plataformas distintas de las ya consideradas.
 Además, la creación del repositorio en el que se alojará el gitbook se procurará de forma automática a través de la API de Github.
 
-En esta práctica sólo se pide desarrollar el plugin para iaas.ull.es
+Se deberá desarrollar una nueva funcionalidad que permita:
 
-[Plugin: gitbook-start-iaas-ull-es-josue-nayra](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-iaas-ull-es-josue-nayra)
+- Crear un token para el programa haciendo uso de la Authorizations API.
+- Guardar el token en ~/.gitbook-start/config.json y usarlo para cualesquiera posteriores comunicaciones con la API de GitHub.
+- Obtener el email y el nombre del autor.
+- Crear el repositorio del libro en GitHub.
+- Generar el libro.
+- Hacer un push del repositorio inicial, incluyendo las gh-pages.
+- Mejorar el plugin gitbook-start-heroku-... para que haciendo uso de la API de Heroku cree la aplicación en Heroku, intentando prescindir del heroku-toolbelt
+- Mejorar el plugin gitbook-start-iaas-... para que haga uso de versiones de ssh enteramente escritas en JavaScript intentando prescindir de OpenSSH y del uso de comandos de la bash
 
-[Plugin: gitbook-start-heroku-josue-nayra](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-heroku-josue-nayra)
+Los plugins realizados para los distintos despliegues son:
+
+- [Plugin: gitbook-start-iaas-ull-es-josue-nayra](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-iaas-ull-es-josue-nayra)
+
+- [Plugin: gitbook-start-heroku-josue-nayra](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-heroku-josue-nayra)
+
 
 
 ### Aspectos a tener en cuenta:
 
-El paquete principal **gitbook-start-josue-nayra** ha sido modificado para prácticas posteriores por lo se ha sobreescrito y puede tener comportamientos diferentes.
+Al ejecutar el comando **gitbook-start -d < directorio > ...** sin introducir la opción de **-u < url >** se mostrará el prompt y pedirá las credenciales del usuario para la creación de un nuevo repositorio.
 
-Al ejecutar el comando **gitbook-start -d <directorio> ...** sin introducir la opción de **-u <url>** se mostrará el prompt y pedirá las credenciales del usuario para la creación de un nuevo repositorio.
-
+**Importante:** Si al intentar crear el gitbook ($ gitbook-start -d < directorio> ....) se muestra el error "bad credentials" es posible que exista un token antiguo y desactualizado en la máquina que ya no posibilita el acceso a GitHub.
+Es necesario borrar este token y volver a ejecutar el comando ($ gitbook-start -d < directorio>...).
 
 
 
 ### Pasos a seguir para la utilización de los plugins
 
-1- Descargar el paquete inicial: **gitbook-start**
+**1- Descargar el paquete inicial: gitbook-start**
     
 ```bash
 $ npm install -g gitbook-start-josue-nayra 
 ```
 
-2- Crear el libro mediante el comando:
+**2- Crear el libro mediante el comando:**
     
 ```bash
 $ gitbook-start -d <directorio> --autor <autor> --name <nombre_libro> --url <url_repo>
@@ -51,20 +63,22 @@ Opciones disponibles para la creación del libro:
 
 Se construye así la estructura inicial por **gitbook-start**, es decir, la jerarquía de directorios conteniendo los scripts y ficheros markdown para el libro.
 
+**Nota:** Si no se introduce la opción de **-u < url >** se mostrará el prompt y pedirá las credenciales del usuario para la creación de un nuevo repositorio. También se pedirá el nombre del repo y comprobará si éste existe.
 
-3- Colocarse en la carpeta que contiene el libro.
+
+**3- Colocarse en la carpeta que contiene el libro.**
 
 ```bash
 $ cd <directorio en el que se ha desplegado el libro>
 ```
 
-4- Instalar las dependencias necesarias mediante el comando:
+**4- Instalar las dependencias necesarias mediante el comando:**
     
 ```bash
 $ npm install 
 ```
 
-5- Instalar los plugins requeridos como dependendecias con la opción --save, como por ejemplo: **gitbook-start-iaas-ull-es-josue-nayra** o **gitbook-start-heroku-josue-nayra**, para el despliegue en iaas y heroku respectivamente.
+**5- Instalar los plugins requeridos como dependendecias con la opción --save.**
     
 ```bash
 $ npm install --save gitbook-start-iaas-ull-es-josue-nayra 
@@ -74,16 +88,19 @@ $ npm install --save gitbook-start-iaas-ull-es-josue-nayra
 $ npm install --save gitbook-start-heroku-josue-nayra
 ```
 
-6- Para la actualización de nuestro repositorio podemos ejecutar una de las tareas descritas en el gulpfile: **gulp push --mensaje <mensaje commit>**.
+**6- Para la actualización de nuestro repositorio podemos ejecutar una de las tareas descritas en el gulpfile:** ***gulp push --mensaje <mensaje commit>***.
 
 
-7- Generamos token. Para ello accedemos a los settings de nuestra cuenta personal en Github, hacemos click en "Personal access token" y finalmente generamos un nuevo token.
+**7- Generamos token. **
+
+Para ello accedemos a los settings de nuestra cuenta personal en Github, hacemos click en "Personal access token" y finalmente generamos un nuevo token.
 
 [Setting de nuestra cuenta en Github](https://github.com/settings/tokens)
 
-8- Una vez generado, lo copiamos y lo añadimos al fichero config.json en el directorio oculto .gitbook-start:
 
-**Fichero config.json:**
+**8- Una vez generado, lo copiamos y lo añadimos al fichero config.json en el directorio oculto /.gitbook-start**
+
+Fichero config.json:
 
 ```json
 {
@@ -91,7 +108,7 @@ $ npm install --save gitbook-start-heroku-josue-nayra
 }
 ```
 
-9- Ejecutar la opción --deploy especificando la máquina remota dónde queremos hacer el despliegue:
+**9- Ejecutar la opción ***--deploy*** especificando la máquina remota dónde queremos hacer el despliegue:**
    
 ```bash
 $ gitbook-start --deploy [iaas-ull-es|heroku] [Opciones]
@@ -105,14 +122,21 @@ para despliegues en iaas-ull-es o en Heroku. Los enlaces podemos encontrarlo en 
 
 
 
-10- Una vez ejecutado el comando anterior, se generará automáticamente en el gulpfile.js una tarea llamada 
-"deploy-<máquina en la que realizar el despliegue>" que permitirá al usuario actualizar el contenido de dicha máquina.
+**10- Una vez ejecutado el comando anterior, se generará automáticamente en el gulpfile.js una tarea llamada "deploy-[heroku|iaas-ull-es]" que permitirá al usuario actualizar el contenido de dicha máquina.**
 
 ```javascript
 gulp.task("deploy-<máquina en la que realizar el despliegue>", function(){
     require(path.join(basePath, 'node_modules','<plugin de depliegue>')).deploy(...);
 });
 ```
+
+**11-  Ahora el usuario podrá ejecutar dicha tarea gulp y actualizar los cambios en el Gitbook desplegado.**
+
+```bash
+$ gulp deploy-[heroku|iaas-ull-es]
+```
+
+
 
 
 ### Tareas Gulp
@@ -168,7 +192,7 @@ $ gulp deploy-<máquina en la se ha desplegado previamente>
 
 - [Repositorio del plugin IAAS](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-iaas-ull-es-josue-nayra) 
 
-
+- [Repositorio API GITHUB](https://github.com/ULL-ESIT-SYTW-1617/crear-repositorio-en-github-josue-nayra)
 
 
 ### Referencias
