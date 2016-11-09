@@ -4,56 +4,99 @@ const path = require('path');
 const basePath = process.cwd();
 const myArgs = require('minimist')(process.argv.slice(2));
 
-const gitconfig = require('git-config');
 const github = require('octonode');
 const git = require('simple-git');
 const prompt = require('prompt');
 
 // console.log("File src/creacion_gitbook.js");
 
+var client;
+var ghme;
+var directorio;
+var autor;
+var url_repo;
+var nombre_gitbook;
+var url_wiki;
+var url_bugs;
 
 //----------------------------------------------------------------------------------------------------
 // Función para la asignación de variables
+var obtener_datosgit = (() =>
+{
+    return new Promise((resolve,reject) => 
+    {
+        var user_git;
+        var email_git;
+        
+        ghme.info(function(err, data, headers) {
+            if(err) throw err;
+        //   console.log("error: " + err);
+        //   console.log("data: " + JSON.stringify(data));
+        //   console.log("headers:" + JSON.stringify(headers));
+          console.log("User:"+data.login);
+          console.log("Email:"+data.email);
+          user_git = data.login;
+          email_git = data.email;
+          
+        //Escribimos en el config.json
+        fs.readFile(path.join(process.env.HOME,'.gitbook-start','config.json'), (err, data) =>
+        {
+            if(err)
+            {
+                throw err;
+            }
+            else
+            {
+                if(JSON.parse(data))
+                {
+                    var datos = JSON.parse(data);
+                    datos.Usuario = user_git;
+                    datos.Email = email_git;
+                    
+                    fs.writeFile(path.join(process.env.HOME,'.gitbook-start','config.json'), JSON.stringify(datos), (err) =>
+                    {
+                      if(err) throw err;
+                    });
+                }
+            }
+        });
+          
+          resolve({user_git: data.login.concat(" ").concat(data.email)})
+        });
+    });    
+});
 
 var asignacion_variables = (() =>
 {
     return new Promise((result, reject) =>
     {
-        gitconfig(function(err,config){
-            if(err) console.error(err);
-            
-            var directorio;
-            var autor;
-            var url_repo;
-            var nombre_gitbook;
-            var url_wiki;
-            var url_bugs;
-            
-            autor = myArgs.autor || config.user.name || "Usuario"; 
-            directorio = myArgs.d || myArgs.dir || myArgs.name || 'Milibro';
-            nombre_gitbook = myArgs.name || myArgs.d || myArgs.autor || "Milibro";
-            directorio = directorio.toLowerCase();
-            nombre_gitbook = nombre_gitbook.toLowerCase();
-            
-            if(myArgs.url)
+            obtener_datosgit().then((resolve,reject) =>
             {
-                url_repo = myArgs.url;
-                url_wiki = myArgs.url.split(".git")[0].concat('.wiki.git');
-                url_bugs = myArgs.url.split(".git")[0].concat('/issues');
-                result({ autor: autor, directorio: directorio, nombre_gitbook: nombre_gitbook, url_repo: url_repo, url_wiki: url_wiki, url_bugs: url_bugs});
-            }
-            else
-            {
-                //Aqui podriamos crear un repo a través de la api de github
-                crear_repo().then((resolve,reject) =>
+                autor = myArgs.autor || resolve.user_git || "Usuario"; 
+                directorio = myArgs.d || myArgs.dir || myArgs.name || 'Milibro';
+                nombre_gitbook = myArgs.name || myArgs.d || myArgs.autor || "Milibro";
+                directorio = directorio.toLowerCase();
+                nombre_gitbook = nombre_gitbook.toLowerCase();
+                
+                if(myArgs.url)
                 {
-                    url_repo = resolve;
-                    url_wiki = resolve.split(".git")[0].concat('.wiki.git');
-                    url_bugs = resolve.split(".git")[0].concat('/issues');
+                    url_repo = myArgs.url;
+                    url_wiki = myArgs.url.split(".git")[0].concat('.wiki.git');
+                    url_bugs = myArgs.url.split(".git")[0].concat('/issues');
                     result({ autor: autor, directorio: directorio, nombre_gitbook: nombre_gitbook, url_repo: url_repo, url_wiki: url_wiki, url_bugs: url_bugs});
-                });
-            }
-        });
+                }
+                else
+                {
+                    //Aqui podriamos crear un repo a través de la api de github
+                    crear_repo().then((resolve1,reject) =>
+                    {
+                        url_repo = resolve1;
+                        url_wiki = resolve1.split(".git")[0].concat('.wiki.git');
+                        url_bugs = resolve1.split(".git")[0].concat('/issues');
+                        result({ autor: autor, directorio: directorio, nombre_gitbook: nombre_gitbook, url_repo: url_repo, url_wiki: url_wiki, url_bugs: url_bugs});
+                    });
+                } 
+            });
     });
 });
 
@@ -165,17 +208,24 @@ var asignar_remoto = ((datos) =>
 // Función para la creación de un libro
 
 var crear_gitbook = (() => {
-    asignacion_variables().then((resolve,reject) =>
+    login().then((resolve,reject) =>
     {
-    //   console.log("Variables:"+JSON.stringify(resolve)); 
-       var  datos = resolve;
-       crear_estructura(datos).then((resolve,reject) =>
-       {
-           asignar_remoto(datos).then(() =>
-           {
-             console.log("Gitbook built!");  
-           });
-       });
+        client = github.client(resolve); //Configuro cliente Git
+
+        ghme = client.me();
+        
+        asignacion_variables().then((resolve,reject) =>
+        {
+            //   console.log("Variables:"+JSON.stringify(resolve)); 
+               var  datos = resolve;
+               crear_estructura(datos).then((resolve,reject) =>
+               {
+                   asignar_remoto(datos).then(() =>
+                   {
+                     console.log("Gitbook built!");  
+                   });
+               });
+        }); 
     });
 });
 
@@ -207,7 +257,7 @@ var crear_token = (() =>
               scopes: ['user', 'repo'],
               note: 'Token para Gitbook'
             }, (err, id, token) => {
-              if (err) return reject(err)
+              if (err) throw err;
             //   console.log(err)
             //   console.log(id)
             //   console.log(token) // Ahora si tenemos el token de github!!
@@ -277,25 +327,17 @@ var crear_repo =(() =>
 {
     return new Promise((result, reject) =>
     {
-        login().then((resolve, reject) => 
-        {
-            // console.log("Resolve login:"+resolve);
-            const client = github.client(resolve); //Obtengo el token
-            const ghme = client.me();
-            // const pkj = require(path.join(basePath,'package.json'));
-        
-            //Creando repositorio
-            ghme.repo({
-               "name": myArgs.d,
-               "description": "Gitbook"
-            },(error, stdout, stderr) => {
-                if(error) throw error;
-                console.log("Creando repositorio con el nombre:"+myArgs.d);
-                console.log("Url repo:"+stdout.clone_url);
-                  
-                result(stdout.clone_url);  
-            });  
-        });
+        //Creando repositorio
+        ghme.repo({
+           "name": myArgs.d,
+           "description": "Gitbook"
+        },(error, stdout, stderr) => {
+            if(error) throw error;
+            console.log("Creando repositorio con el nombre:"+myArgs.d);
+            console.log("Url repo:"+stdout.clone_url);
+              
+            result(stdout.clone_url);  
+        });  
     });
 });
 
