@@ -47,7 +47,7 @@ else
 
                 }
             } catch(e){
-                console.log("No se ha encontrado el plugin. Error: "+ e);
+                console.log("Fallo al ejecutar el plugin. Error: "+ e);
             }
         }
         else
