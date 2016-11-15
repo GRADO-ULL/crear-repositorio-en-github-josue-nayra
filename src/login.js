@@ -6,44 +6,46 @@ const myArgs = require('minimist')(process.argv.slice(2));
 
 const github = require('octonode');
 const git = require('simple-git');
-const prompt = require('prompt');
-
+// const prompt = require('prompt');
+const inquirer = require('inquirer');
 
 
 //----------------------------------------------------------------------------------------------------
 // Función para la creación de un token.
 
-var schema = {
-    properties: {
-        name: {
-            required: true
-        },
-        password: {
-            hidden: true
-        }
+var schema = [
+    {
+        name: "name",
+        message: "Github Username:"
+    },    
+    {
+        name: "password",
+        message: "Github password:",
+        type: "password"
+    },
+    {
+        name: "descripcion",
+        message: "Enter the description for your token:",
+        default: "Token para Gitbook"
     }
-};
+];
 
 var crear_token = (() =>
 {
     return new Promise((resolve,reject) =>
     {
-        prompt.start();
-        
-        prompt.get(schema, (err, result) =>
+        inquirer.prompt(schema).then((result) =>
         {
-           if(err) throw err;
-           
           github.auth.config({ username: result.name, password: result.password }).login({
               scopes: ['user', 'repo'],
-              note: 'Token para Gitbook'
+              note: result.descripcion
             }, (err, id, token) => {
               if (err) throw err;
             //   console.log(err)
             //   console.log(id)
             //   console.log(token) // Ahora si tenemos el token de github!!
               resolve(token);
-            })        
+            });              
         });
     });
 });
@@ -77,7 +79,7 @@ var login = (() =>
         }
         else
         {
-            console.log("Autenticación:");
+            console.log("Autenticación. Introduzca su usuario y password de GitHub:");
             crear_token().then((resolve,reject) =>
             {
                 // console.log("TOKEEEEENNNN:"+resolve);

@@ -6,7 +6,7 @@ const myArgs = require('minimist')(process.argv.slice(2));
 
 const github = require('octonode');
 const git = require('simple-git');
-const prompt = require('prompt');
+const inquirer = require('inquirer');
 const sync_git = require(path.join(__dirname, 'login.js'));
 
 // console.log("File src/creacion_gitbook.js");
@@ -240,21 +240,51 @@ var crear_gitbook = (() => {
 //----------------------------------------------------------------------------------------------------
 // Función para la creación del repositorio
 
+var get_namerepo = (() =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        var schema_repo =  [
+            {
+              name: "name_repository",
+              message: "Enter the name of the repository:",
+              default: myArgs.d
+            }
+        ];
+        
+        inquirer.prompt(schema_repo).then((respuestas) =>
+        {
+            resolve(respuestas.name_repository);
+        });
+    })    
+});
+
 var crear_repo =(() =>
 {
     return new Promise((result, reject) =>
     {
-        //Creando repositorio
-        ghme.repo({
-           "name": myArgs.d,
-           "description": "Gitbook"
-        },(error, stdout, stderr) => {
-            if(error) throw error;
-            console.log("Creando repositorio con el nombre:"+myArgs.d);
-            console.log("Url repo:"+stdout.clone_url);
-              
-            result(stdout.clone_url);  
-        });  
+        get_namerepo().then((resolve,reject) =>
+        {
+           //Creando repositorio
+            ghme.repo({
+               "name": resolve,
+               "description": "Gitbook"
+            },(error, stdout, stderr) => {
+                if(error)
+                {
+                    // console.log(JSON.stringify(error));
+                    console.error("Error: "+error.body.errors[0].message);
+                    // throw error;
+                }
+                else
+                {
+                    // console.log("Creando repositorio con el nombre:"+myArgs.d);
+                    console.log("Url repo:"+stdout.clone_url);
+                      
+                    result(stdout.clone_url);     
+                }
+            }); 
+        });
     });
 });
 
