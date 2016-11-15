@@ -31,38 +31,38 @@ var obtener_datosgit = (() =>
         
         ghme.info(function(err, data, headers) {
             if(err) throw err;
-        //   console.log("error: " + err);
-        //   console.log("data: " + JSON.stringify(data));
-        //   console.log("headers:" + JSON.stringify(headers));
-          console.log("User:"+data.login);
-          console.log("Email:"+data.email);
-          user_git = data.login;
-          email_git = data.email;
+            //   console.log("error: " + err);
+            //   console.log("data: " + JSON.stringify(data));
+            //   console.log("headers:" + JSON.stringify(headers));
+            console.log("User:"+data.login);
+            console.log("Email:"+data.email);
+            user_git = data.login;
+            email_git = data.email;
           
-        //Escribimos en el config.json
-        fs.readFile(path.join(process.env.HOME,'.gitbook-start','config.json'), (err, data) =>
-        {
-            if(err)
+            //Escribimos en el config.json
+            fs.readFile(path.join(process.env.HOME,'.gitbook-start','config.json'), (err, data) =>
             {
-                throw err;
-            }
-            else
-            {
-                if(JSON.parse(data))
+                if(err)
                 {
-                    var datos = JSON.parse(data);
-                    datos.Usuario = user_git;
-                    datos.Email = email_git;
-                    
-                    fs.writeFile(path.join(process.env.HOME,'.gitbook-start','config.json'), JSON.stringify(datos), (err) =>
-                    {
-                      if(err) throw err;
-                    });
+                    throw err;
                 }
-            }
-        });
-          
-          resolve({user_git: data.login.concat(" ").concat(data.email)})
+                else
+                {
+                    if(JSON.parse(data))
+                    {
+                        var datos = JSON.parse(data);
+                        datos.Usuario = user_git;
+                        datos.Email = email_git;
+                        
+                        fs.writeFile(path.join(process.env.HOME,'.gitbook-start','config.json'), JSON.stringify(datos), (err) =>
+                        {
+                          if(err) throw err;
+                        });
+                    }
+                }
+            });
+              
+            resolve({user_git: data.login.concat(" ").concat(data.email)})
         });
     });    
 });
