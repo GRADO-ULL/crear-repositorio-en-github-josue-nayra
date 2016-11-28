@@ -6,7 +6,6 @@ const basePath = process.cwd();
 const myArgs = require('minimist')(process.argv.slice(2));
 const creacion = require(path.join(__dirname,'../src/creacion_gitbook.js'));
 const json = require(path.join(__dirname,'../package.json'));
-const fs = require('fs-extra');
 
 if(myArgs.h || myArgs.help)
 {

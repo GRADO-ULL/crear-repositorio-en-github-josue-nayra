@@ -47,17 +47,12 @@
     "ejs": "^2.5.2",
     "fs-extra": "^0.30.0",
     "gh-pages": "^0.11.0",
-    "git-config": "0.0.7",
-    "gitbook-start-iaas-ull-es-josue-nayra": "^1.0.6",
     "gulp": "^3.9.1",
-    "gulp-git": "^1.11.3",
     "gulp-install": "^0.6.0",
-    "gulp-run": "^1.7.1",
     "gulp-shell": "^0.5.2",
     "inquirer": "^1.2.3",
     "minimist": "^1.2.0",
     "octonode": "^0.7.6",
-    "prompt": "^1.0.0",
     "simple-git": "^1.54.0",
     "ssh-exec": "^2.0.0"
   }

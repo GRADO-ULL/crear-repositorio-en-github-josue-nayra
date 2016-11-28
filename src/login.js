@@ -1,12 +1,7 @@
 const fs = require('fs-extra');
-const ejs = require('ejs');
 const path = require('path');
-const basePath = process.cwd();
-const myArgs = require('minimist')(process.argv.slice(2));
 
 const github = require('octonode');
-const git = require('simple-git');
-// const prompt = require('prompt');
 const inquirer = require('inquirer');
 
 
